@@ -112,3 +112,7 @@ PLATEAU_RADIUS = 70.0                # The radius of the entire plateau at its b
 PLATEAU_FLAT_TOP_RADIUS = 25.0       # The radius of the flat part on top
 PLATEAU_BENCH_HEIGHT = 5.0           # The vertical height of each terrace/bench
 PLATEAU_NOISE_AMPLITUDE = 0.75       # How much random noise to add to the surface
+
+# Plateau top pad (flat zone at top)
+PLATEAU_TOP_PAD_RADIUS = 12.0   # radius of flat top zone
+PLATEAU_TOP_FLATTEN = 0       # how strongly to flatten the center

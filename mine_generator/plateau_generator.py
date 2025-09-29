@@ -9,7 +9,7 @@ from . import config as cfg
 from . import pit_generator
 
 def compute_plateau_height_at(x, y):
-    """Plateau as flipped pit with rim blending + flattened top + pseudo roads."""
+    """Plateau as flipped pit with rim blending + flat top + pseudo roads."""
     if not cfg.PLATEAU_ENABLED:
         return None
 
@@ -23,9 +23,10 @@ def compute_plateau_height_at(x, y):
     pit_depth = pit_generator.compute_pit_depth(lx, ly)
     plateau_h = -pit_depth * 0.7
 
-    # --- Flatten top ---
-    if plateau_h > cfg.PLATEAU_MAX_HEIGHT * 0.85:
-        plateau_h = cfg.PLATEAU_MAX_HEIGHT
+    # --- Top pad flattening ---
+    if r < cfg.PLATEAU_TOP_PAD_RADIUS:
+        pad_blend = utils.smoothstep(1.0 - (r / cfg.PLATEAU_TOP_PAD_RADIUS))
+        plateau_h = utils.lerp(plateau_h, cfg.PLATEAU_MAX_HEIGHT, pad_blend * cfg.PLATEAU_TOP_FLATTEN)
 
     # --- Blend with rim ---
     rim_r = pit_generator.compute_effective_radius(theta)
