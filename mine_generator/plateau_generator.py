@@ -8,33 +8,42 @@ to create a dump/plateau feature.
 from . import config as cfg
 from . import pit_generator
 
-
 def compute_plateau_height_at(x, y):
-    """
-    Compute plateau height at (x, y) by reusing pit depth generation.
-    Returns None if plateau is disabled.
-    """
+    """Plateau as flipped pit with rim blending + flattened top + pseudo roads."""
     if not cfg.PLATEAU_ENABLED:
         return None
 
-    # Local coords relative to plateau center
     lx, ly = x - cfg.PLATEAU_CENTER_X, y - cfg.PLATEAU_CENTER_Y
+    r, theta = math.hypot(lx, ly), math.atan2(ly, lx)
 
-    # Get pit depth at this local point
-    pit_depth = pit_generator.compute_pit_depth(lx, ly)
-
-    # Flip sign (pit is negative, plateau should be positive)
-    plateau_h = -pit_depth
-
-    # Scale plateau height down
-    plateau_h *= cfg.PIT_DEPTH_VARIATION  # or a custom factor, e.g. 0.6
-
-    # Clamp to plateau max height
-    if plateau_h > cfg.PLATEAU_MAX_HEIGHT:
-        plateau_h = cfg.PLATEAU_MAX_HEIGHT
-
-    # Ensure plateau only within radius
-    if (lx**2 + ly**2) ** 0.5 > cfg.PLATEAU_RADIUS:
+    if r > cfg.PLATEAU_RADIUS:
         return None
 
-    return plateau_h
+    # --- Base pit depth (flipped) ---
+    pit_depth = pit_generator.compute_pit_depth(lx, ly)
+    plateau_h = -pit_depth * 0.7
+
+    # --- Flatten top ---
+    if plateau_h > cfg.PLATEAU_MAX_HEIGHT * 0.85:
+        plateau_h = cfg.PLATEAU_MAX_HEIGHT
+
+    # --- Blend with rim ---
+    rim_r = pit_generator.compute_effective_radius(theta)
+    dist_from_rim = max(0.0, r - rim_r)
+    blend_t = utils.smoothstep(1.0 - (dist_from_rim / (cfg.PLATEAU_RADIUS * 0.5)))
+    plateau_h *= blend_t
+
+    # --- Add pseudo-road spiral ---
+    eff_r = pit_generator.compute_effective_radius(theta, use_road_smooth=False)
+    spiral_theta = pit_generator.road_spiral_theta_from_radius(r, eff_r)
+    d = (theta - spiral_theta + math.pi) % (2.0 * math.pi) - math.pi
+    if abs(d) < math.radians(10):
+        plateau_h *= cfg.ROAD_FLATTEN
+
+    # --- Noise for realism ---
+    noise = utils.fbm(
+        x * 0.02, y * 0.02, cfg.NOISE_SEED + 2021, octaves=3
+    ) * cfg.PLATEAU_NOISE_AMPLITUDE
+    plateau_h += noise
+
+    return max(0.0, min(plateau_h, cfg.PLATEAU_MAX_HEIGHT))
