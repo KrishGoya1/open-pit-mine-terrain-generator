@@ -101,3 +101,14 @@ rng_global = random.Random(NOISE_SEED)
 
 # The angle determining the main road's position relative to the working face
 WORKING_FACE_ANGLE = rng_global.uniform(-math.pi, math.pi)
+
+
+# --- PLATEAU / DUMP MOUNTAIN PARAMETERS ---
+PLATEAU_ENABLED = True               # Master switch to turn this feature on/off
+PLATEAU_CENTER_X = -100.0            # X-coordinate for the center of the plateau
+PLATEAU_CENTER_Y = 80.0              # Y-coordinate for the center of the plateau
+PLATEAU_MAX_HEIGHT = 45.0            # The final height of the flat top
+PLATEAU_RADIUS = 70.0                # The radius of the entire plateau at its base
+PLATEAU_FLAT_TOP_RADIUS = 25.0       # The radius of the flat part on top
+PLATEAU_BENCH_HEIGHT = 5.0           # The vertical height of each terrace/bench
+PLATEAU_NOISE_AMPLITUDE = 0.75       # How much random noise to add to the surface
