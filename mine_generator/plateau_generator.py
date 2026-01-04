@@ -4,12 +4,14 @@ Plateau generator by reusing pit generation logic.
 We generate a pit, flip it vertically, scale it down, and offset it
 to create a dump/plateau feature.
 """
-
+import math
+from . import utils
 from . import config as cfg
 from . import pit_generator
 
 def compute_plateau_height_at(x, y):
     """Plateau as flipped pit with rim blending + flat top + pseudo roads."""
+    import math
     if not cfg.PLATEAU_ENABLED:
         return None
 
